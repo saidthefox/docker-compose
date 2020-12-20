@@ -60,7 +60,6 @@ services:
       - "traefik.http.routers.api.rule=Host(`traefik.${TRAEFIK_DOMAIN}`)"
       - "traefik.http.routers.api.service=api@internal"
       - "traefik.http.routers.api.entrypoints=websecure"
-      # Uncomment to enable HTTPS via ACME
       - "traefik.http.routers.api.tls.certResolver=primary"
     networks:
       - seat-network
@@ -80,7 +79,6 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.seat-web.rule=Host(`${SEAT_SUBDOMAIN}.${TRAEFIK_DOMAIN}`)"
       - "traefik.http.routers.seat-web.entrypoints=websecure"
-      # Uncomment to enable HTTPS via ACME
       - "traefik.http.routers.seat-web.tls.certResolver=primary"
     depends_on:
       - mariadb
@@ -100,7 +98,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - seat-web # so that we can get db migrations done
+      - seat-web
       - mariadb
       - redis
     networks:
@@ -118,7 +116,7 @@ services:
     env_file:
       - .env
     depends_on:
-      - seat-web # so that we can get db migrations done
+      - seat-web
       - mariadb
       - redis
     networks:
@@ -140,7 +138,6 @@ services:
      - "traefik.enable=true"
      - "traefik.http.routers.saidthefox.rule=Host(`saidthefox.com`)"
      - "traefik.http.routers.saidthefox.entrypoints=websecure"
-  # If you want to enable SSL, uncomment the following line.
      - "traefik.http.routers.saidthefox.tls.certresolver=primary"
     networks:
      - seat-network
@@ -169,10 +166,52 @@ services:
      - "traefik.enable=true"
      - "traefik.http.routers.live.rule=Host(`live.saidthefox.com`)"
      - "traefik.http.routers.live.entrypoints=websecure"
-  # If you want to enable SSL, uncomment the following line.
      - "traefik.http.routers.live.tls.certresolver=primary"
     networks:
      - seat-network
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    restart: unless-stopped
+    networks:
+      - seat-network
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.gitlab.entrypoints=websecure"
+     - "traefik.http.routers.gitlab.rule=Host(`gitlab.saidthefox.com`)"
+     - "traefik.http.services.gitlab.loadbalancer.server.scheme=http"
+     - "traefik.http.services.gitlab.loadbalancer.server.port=80"
+     - "traefik.http.routers.gitlab.tls.certResolver=primary"
+    volumes:
+     - "/home/samfox/gitlab/config:/etc/gitlab"
+     - "/home/samfox/gitlab/data:/var/opt/gitlab"
+     - "/home/samfox/gitlab/logs:/var/log/gitlab"
+    ports:
+     - "223:22"
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.saidthefox.com'
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        gitlab_rails['gitlab_shell_ssh_port'] = 223
+        nginx['redirect_http_to_https'] = false
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on"
+        }
+
+  chowdown:
+    image: gregyankovoy/chowdown
+    restart: unless-stopped
+    networks:
+      - seat-network
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.chowdown.entrypoints=websecure"
+     - "traefik.http.routers.chowdown.rule=Host(`chowdown.saidthefox.com`)"
+     - "traefik.http.routers.chowdown.tls.certResolver=primary"
+    volumes:
+     - "/home/samfox/chowdown/config:/config"
 
 volumes:
     mariadb-data:
