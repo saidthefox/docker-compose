@@ -241,7 +241,8 @@ services:
     volumes:
       - /opt/plex/config:/config
       - /opt/plex/transcode:/transcode
-      - /JakesDrive/Movies:/data
+      - /media/Movies:/data
+      - /media/Shows:/data
     hostname: plex.saidthefox.com
     ports:
      - 32400:32400/tcp
