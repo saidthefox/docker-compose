@@ -183,7 +183,7 @@ services:
      - "traefik.http.services.gitlab.loadbalancer.server.port=80"
      - "traefik.http.routers.gitlab.tls.certResolver=primary"
     volumes:
-     - "/opt//gitlab/config:/etc/gitlab"
+     - "/opt/gitlab/config:/etc/gitlab"
      - "/opt/gitlab/data:/var/opt/gitlab"
      - "/opt/gitlab/logs:/var/log/gitlab"
     ports:
