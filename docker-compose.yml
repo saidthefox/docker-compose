@@ -212,6 +212,52 @@ services:
      - "traefik.http.routers.chowdown.tls.certResolver=primary"
     volumes:
      - "/home/samfox/chowdown/config:/config"
+  
+  brandon:
+    build:
+      context: https://github.com/saidthefox/brandon.saidthefox.com.git
+      dockerfile: Dockerfile-brandon
+    container_name: brandon.saidthefox.com
+    expose:
+     - 80
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.brandon.rule=Host(`brandon.saidthefox.com`)"
+     - "traefik.http.routers.brandon.entrypoints=websecure"
+     - "traefik.http.routers.brandon.tls.certresolver=primary"
+    networks:
+     - seat-network
+
+  plex:                                                                                 image: plexinc/pms-docker:latest
+    container_name: plex
+    environment:
+      - TZ=America/Chicago                                                                - PLEX_CLAIM=claim-Q8jMjzKHJ3Fnw2UJ_QUw
+      - ADVERTISE_IP=https://plex.saidthefox.com:443
+      - PLEX_UID=${USER}
+      - PLEX_GID=${USER}                                                                  - VERSION=docker
+    volumes:
+      - /home/samfox/plex-traefik/config:/config
+      - /home/samfox/plex-traefik/transcode:/transcode
+      - /JakesDrive/Movies:/data
+    hostname: plex.saidthefox.com
+    ports:
+     - 32400:32400/tcp
+     - 32400:32400/udp
+     - 3005:3005/tcp
+     - 8324:8324/tcp
+     - 32469:32469/tcp
+     - 1900:1900/udp
+     - 32410:32410/udp
+     - 32412:32412/udp
+     - 32413:32413/udp
+     - 32414:32414/udp                                                                  restart: always                                                                     networks:
+      - seat-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.plex.rule=Host(`plex.saidthefox.com`)"
+      - "traefik.http.routers.plex.entrypoints=websecure"
+      - "traefik.http.routers.plex.tls.certresolver=primary"
+      - "traefik.http.services.plex.loadbalancer.server.port=32400"
 
 volumes:
     mariadb-data:
