@@ -228,13 +228,16 @@ services:
     networks:
      - seat-network
 
-  plex:                                                                                 image: plexinc/pms-docker:latest
+  plex:                                                                                 
+  image: plexinc/pms-docker:latest
     container_name: plex
     environment:
-      - TZ=America/Chicago                                                                - PLEX_CLAIM=claim-Q8jMjzKHJ3Fnw2UJ_QUw
+      - TZ=America/Chicago                                                                
+      - PLEX_CLAIM=claim-Q8jMjzKHJ3Fnw2UJ_QUw
       - ADVERTISE_IP=https://plex.saidthefox.com:443
       - PLEX_UID=${USER}
-      - PLEX_GID=${USER}                                                                  - VERSION=docker
+      - PLEX_GID=${USER}                                                                  
+      - VERSION=docker
     volumes:
       - /opt/plex/config:/config
       - /opt/plex/transcode:/transcode
