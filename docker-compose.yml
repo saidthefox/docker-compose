@@ -183,9 +183,9 @@ services:
      - "traefik.http.services.gitlab.loadbalancer.server.port=80"
      - "traefik.http.routers.gitlab.tls.certResolver=primary"
     volumes:
-     - "/home/samfox/gitlab/config:/etc/gitlab"
-     - "/home/samfox/gitlab/data:/var/opt/gitlab"
-     - "/home/samfox/gitlab/logs:/var/log/gitlab"
+     - "/opt//gitlab/config:/etc/gitlab"
+     - "/opt/gitlab/data:/var/opt/gitlab"
+     - "/opt/gitlab/logs:/var/log/gitlab"
     ports:
      - "223:22"
     environment:
@@ -211,7 +211,7 @@ services:
      - "traefik.http.routers.chowdown.rule=Host(`chowdown.saidthefox.com`)"
      - "traefik.http.routers.chowdown.tls.certResolver=primary"
     volumes:
-     - "/home/samfox/chowdown/config:/config"
+     - "/opt/chowdown/config:/config"
   
   brandon:
     build:
@@ -236,8 +236,8 @@ services:
       - PLEX_UID=${USER}
       - PLEX_GID=${USER}                                                                  - VERSION=docker
     volumes:
-      - /home/samfox/plex-traefik/config:/config
-      - /home/samfox/plex-traefik/transcode:/transcode
+      - /opt/plex/config:/config
+      - /opt/plex/transcode:/transcode
       - /JakesDrive/Movies:/data
     hostname: plex.saidthefox.com
     ports:
