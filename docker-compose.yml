@@ -253,7 +253,9 @@ services:
      - 32410:32410/udp
      - 32412:32412/udp
      - 32413:32413/udp
-     - 32414:32414/udp                                                                  restart: always                                                                     networks:
+     - 32414:32414/udp                                                                  
+     restart: always                                                                     
+     networks:
       - seat-network
     labels:
       - "traefik.enable=true"
