@@ -126,12 +126,23 @@ services:
       options:
         max-size: "10Mb"
         max-file: "5"
+  
+  saidthefox.js:
+    build:
+      context: ./saidthefox.com
+      dockerfile: Dockerfile-saidthefoxjs
+    container_name: saidthefox.js
+    command: npm start
+    ports:
+      -  "3006:3006"
+    networks:
+      - seat-network
 
   saidthefox.com:
     build:
-      context: ./saidthefox.com
-      dockerfile: Dockerfile-saidthefox
-    container_name: saidthefox.com  
+      context: ./saidthefox.com-nginx-docker
+      dockerfile: Dockerfile-saidthefox-nginx
+    container_name: saidthefox.com
     expose:
      - 80
     labels:
@@ -327,8 +338,116 @@ services:
     networks:
      - seat-network
 
+  brandonisgey.js:
+    build:
+      context: ./brandonisgey.saidthefox.com
+      dockerfile: Dockerfile-brandonisgeyjs
+    container_name: brandonisgey.js
+    command: npm start
+    ports:
+      -  "3007:3007"
+    networks:
+      - seat-network
+
+  brandonisgey.saidthefox.com:
+    build:
+      context: ./brandonisgey-nginx-docker
+      dockerfile: Dockerfile-brandonisgey-nginx
+    container_name: brandonisgey.saidthefox.com
+    expose:
+     - 80
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.brandonisgey.rule=Host(`brandonisgey.saidthefox.com`)"
+     - "traefik.http.routers.brandonisgey.entrypoints=websecure"
+     - "traefik.http.routers.brandonisgey.tls.certresolver=primary"
+    networks:
+     - seat-network
+
+  tree.js:
+    build:
+      context: ./tree.saidthefox.com
+      dockerfile: Dockerfile-treejs
+    container_name: tree.js
+    command: npm start
+    environment:
+      - CONNECTIONSTRING=mongodb://mongo:27017/notes
+    ports:
+      -  "3008:3008"
+    networks:
+      - seat-network
+
+  tree.saidthefox.com:
+    build:
+      context: ./tree.saidthefox.com-nginx-docker
+      dockerfile: Dockerfile-tree-nginx
+    container_name: tree.saidthefox.com
+    expose:
+     - 80
+    labels:
+     - "traefik.enable=true"
+     - "traefik.http.routers.tree.rule=Host(`tree.saidthefox.com`)"
+     - "traefik.http.routers.tree.entrypoints=websecure"
+     - "traefik.http.routers.tree.tls.certresolver=primary"
+    networks:
+     - seat-network
+
+  mongo:
+    image: mongo:4.2.8
+    ports:
+     - 27017:27017
+    volumes:
+     - mongodb:/data/db
+     - mongodb_config:/data/configdb
+    networks:
+     - seat-network
+
+  teamspeak:
+    image: teamspeak
+    restart: always
+    ports:
+      - 9987:9987/udp
+      - 10011:10011
+      - 30033:30033
+    environment:
+      TS3SERVER_DB_PLUGIN: ts3db_mariadb
+      TS3SERVER_DB_SQLCREATEPATH: create_mariadb
+      TS3SERVER_DB_HOST: tsdb
+      TS3SERVER_DB_USER: root
+      TS3SERVER_DB_PASSWORD: prettyboysarepretty
+      TS3SERVER_DB_NAME: teamspeak
+      TS3SERVER_DB_WAITUNTILREADY: 30
+      TS3SERVER_LICENSE: accept
+  tsdb:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: prettyboysarepretty
+      MYSQL_DATABASE: teamspeak
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    command: -H unix:///var/run/docker.sock
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/portainer_data:/data
+    networks: 
+      - seat-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer-secure.rule=Host(`portainer.saidthefox.com`)"
+      - "traefik.http.routers.portainer-secure.entrypoints=websecure"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer-secure.service=portainer"
+      - "traefik.http.routers.portainer-secure.tls.certresolver=primary"
+
+
 volumes:
     mariadb-data:
+    portainer_data:
     db-data:
+    mongodb:
+    mongodb_config:
 networks:
     seat-network:
